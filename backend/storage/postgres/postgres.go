@@ -15,8 +15,15 @@ type client struct {
 	conn *pgxpool.Pool
 }
 
-func (c *client) SaveMessage(_ context.Context, _ service.Message) error {
-	panic("not implemented") // TODO: Implement
+// SaveMessage stores a message in the database
+func (c *client) SaveMessage(ctx context.Context, msg service.Message) error {
+	return sqlc.New(c.conn).SaveMessage(ctx, sqlc.SaveMessageParams{
+		// ID is expected to be automatically set by the database
+		ReceiverID: msg.Target,
+		SenderID:   msg.Sender,
+		Message:    msg.Content,
+		// CreatedAt is expected to be automatically set by the database
+	})
 }
 
 // ListMessagesByParticipant retrieves all messages sent or received by a participant from the database
