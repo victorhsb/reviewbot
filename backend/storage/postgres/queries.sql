@@ -8,4 +8,4 @@ SELECT * FROM users WHERE id = $1;
 INSERT INTO messages (receiver_id, sender_id, message) VALUES ($1, $2, $3);
 
 -- name: SaveUser :one
-INSERT INTO users (username, role) VALUES ($1, $2) RETURNING *;
+INSERT INTO users (username) VALUES ($1) RETURNING *;

@@ -11,8 +11,8 @@ import (
 
 type Message struct {
 	ID         uuid.UUID
-	ReceiverID uuid.UUID
-	SenderID   uuid.UUID
+	ReceiverID *uuid.UUID
+	SenderID   *uuid.UUID
 	Message    string
 	CreatedAt  pgtype.Timestamptz
 }
@@ -35,6 +35,5 @@ type ProductReview struct {
 type User struct {
 	ID        uuid.UUID
 	Username  string
-	Role      string
 	CreatedAt pgtype.Timestamptz
 }

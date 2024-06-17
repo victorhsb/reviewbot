@@ -12,18 +12,13 @@ import (
 )
 
 const getUser = `-- name: GetUser :one
-SELECT id, username, role, created_at FROM users WHERE id = $1
+SELECT id, username, created_at FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 	row := q.db.QueryRow(ctx, getUser, id)
 	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.Role,
-		&i.CreatedAt,
-	)
+	err := row.Scan(&i.ID, &i.Username, &i.CreatedAt)
 	return i, err
 }
 
@@ -62,8 +57,8 @@ INSERT INTO messages (receiver_id, sender_id, message) VALUES ($1, $2, $3)
 `
 
 type SaveMessageParams struct {
-	ReceiverID uuid.UUID
-	SenderID   uuid.UUID
+	ReceiverID *uuid.UUID
+	SenderID   *uuid.UUID
 	Message    string
 }
 
@@ -73,22 +68,12 @@ func (q *Queries) SaveMessage(ctx context.Context, arg SaveMessageParams) error 
 }
 
 const saveUser = `-- name: SaveUser :one
-INSERT INTO users (username, role) VALUES ($1, $2) RETURNING id, username, role, created_at
+INSERT INTO users (username) VALUES ($1) RETURNING id, username, created_at
 `
 
-type SaveUserParams struct {
-	Username string
-	Role     string
-}
-
-func (q *Queries) SaveUser(ctx context.Context, arg SaveUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, saveUser, arg.Username, arg.Role)
+func (q *Queries) SaveUser(ctx context.Context, username string) (User, error) {
+	row := q.db.QueryRow(ctx, saveUser, username)
 	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.Role,
-		&i.CreatedAt,
-	)
+	err := row.Scan(&i.ID, &i.Username, &i.CreatedAt)
 	return i, err
 }

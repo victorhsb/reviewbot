@@ -1,0 +1,11 @@
+with-expecter: true
+outpkg: mock
+packages:
+  github.com/victorhsb/review-bot/backend/service:
+    config:
+      filename: "{{.InterfaceName}}_mock.go"
+    interfaces:
+      MessageStorage:
+        config:
+          mockname: "MessageStorage"
+          dir: "storage/mock"

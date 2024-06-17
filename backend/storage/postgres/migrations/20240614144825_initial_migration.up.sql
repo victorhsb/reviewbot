@@ -19,15 +19,14 @@ BEGIN;
     CREATE TABLE users (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         username TEXT NOT NULL UNIQUE,
-        role TEXT NOT NULL,
 
         created_at TIMESTAMPTZ DEFAULT now()
     );
 
     CREATE TABLE messages (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        receiver_id UUID NOT NULL,
-        sender_id UUID NOT NULL,
+        receiver_id UUID,
+        sender_id UUID,
         message TEXT NOT NULL,
         created_at TIMESTAMPTZ DEFAULT now(),
 

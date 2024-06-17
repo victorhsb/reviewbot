@@ -19,7 +19,7 @@ type client struct {
 func (c *client) SaveMessage(ctx context.Context, msg service.Message) error {
 	return sqlc.New(c.conn).SaveMessage(ctx, sqlc.SaveMessageParams{
 		// ID is expected to be automatically set by the database
-		ReceiverID: msg.Target,
+		ReceiverID: msg.Receiver,
 		SenderID:   msg.Sender,
 		Message:    msg.Content,
 		// CreatedAt is expected to be automatically set by the database
@@ -39,7 +39,7 @@ func (c *client) ListMessagesByParticipant(ctx context.Context, id uuid.UUID) ([
 	for _, m := range messages {
 		result = append(result, service.Message{
 			Sender:    m.SenderID,
-			Target:    m.ReceiverID,
+			Receiver:  m.ReceiverID,
 			Content:   m.Message,
 			Timestamp: m.CreatedAt.Time,
 		})
@@ -48,7 +48,7 @@ func (c *client) ListMessagesByParticipant(ctx context.Context, id uuid.UUID) ([
 	return result, nil
 }
 
-func New(ctx context.Context, connUrl string) (service.MessageRepository, error) {
+func New(ctx context.Context, connUrl string) (service.MessageStorage, error) {
 	conn, err := pgxpool.New(ctx, connUrl)
 	if err != nil {
 		return nil, fmt.Errorf("could not establish connection to postgres; %w", err)

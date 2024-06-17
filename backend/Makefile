@@ -10,6 +10,7 @@ test:
 
 gen: tools
 	@sqlc generate
+	@mockery
 
 deps:
 	@docker compose up -d db

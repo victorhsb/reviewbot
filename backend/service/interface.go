@@ -15,11 +15,11 @@ type MessageWriter interface {
 // MessageReader defines the interface definition for the message reader
 type MessageReader interface {
 	// GetMessagesByParticipant returns a list of messages sent or received by a specific user
-	GetMessagesByParticipant(context.Context, uuid.UUID) (map[string][]Message, error)
+	GetMessagesByParticipant(context.Context, uuid.UUID) ([]Message, error)
 }
 
-// MessageRepository defines the interface definition for the message persistence layer
-type MessageRepository interface {
+// MessageStorage defines the interface definition for the message persistence layer
+type MessageStorage interface {
 	SaveMessage(context.Context, Message) error
 
 	ListMessagesByParticipant(context.Context, uuid.UUID) ([]Message, error)
