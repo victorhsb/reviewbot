@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getUser = `-- name: GetUser :one
@@ -29,11 +28,11 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const listMessagesByParticipant = `-- name: ListMessagesByParticipant :many
-SELECT id, receiver_id, sender_id, message, created_at FROM messages WHERE sender_id = $1 OR receiver_id = $1 ORDER BY created_at
+SELECT id, receiver_id, sender_id, message, created_at FROM messages WHERE sender_id = $1::uuid OR receiver_id = $1::uuid ORDER BY created_at
 `
 
-func (q *Queries) ListMessagesByParticipant(ctx context.Context, senderID pgtype.UUID) ([]Message, error) {
-	rows, err := q.db.Query(ctx, listMessagesByParticipant, senderID)
+func (q *Queries) ListMessagesByParticipant(ctx context.Context, dollar_1 uuid.UUID) ([]Message, error) {
+	rows, err := q.db.Query(ctx, listMessagesByParticipant, dollar_1)
 	if err != nil {
 		return nil, err
 	}
@@ -63,8 +62,8 @@ INSERT INTO messages (receiver_id, sender_id, message) VALUES ($1, $2, $3)
 `
 
 type SaveMessageParams struct {
-	ReceiverID pgtype.UUID
-	SenderID   pgtype.UUID
+	ReceiverID uuid.UUID
+	SenderID   uuid.UUID
 	Message    string
 }
 

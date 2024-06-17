@@ -11,16 +11,16 @@ import (
 
 type Message struct {
 	ID         uuid.UUID
-	ReceiverID pgtype.UUID
-	SenderID   pgtype.UUID
+	ReceiverID uuid.UUID
+	SenderID   uuid.UUID
 	Message    string
-	CreatedAt  interface{}
+	CreatedAt  pgtype.Timestamptz
 }
 
 type Product struct {
 	ID        uuid.UUID
 	Title     string
-	CreatedAt interface{}
+	CreatedAt pgtype.Timestamptz
 }
 
 type ProductReview struct {
@@ -29,12 +29,12 @@ type ProductReview struct {
 	Rating    pgtype.Int4
 	Sentiment pgtype.Int4
 	Comment   pgtype.Text
-	CreatedAt interface{}
+	CreatedAt pgtype.Timestamptz
 }
 
 type User struct {
 	ID        uuid.UUID
 	Username  string
 	Role      string
-	CreatedAt interface{}
+	CreatedAt pgtype.Timestamptz
 }

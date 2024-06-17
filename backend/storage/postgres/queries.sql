@@ -1,5 +1,5 @@
 -- name: ListMessagesByParticipant :many
-SELECT * FROM messages WHERE sender_id = $1 OR receiver_id = $1 ORDER BY created_at;
+SELECT * FROM messages WHERE sender_id = $1::uuid OR receiver_id = $1::uuid ORDER BY created_at;
 
 -- name: GetUser :one
 SELECT * FROM users WHERE id = $1;
