@@ -26,9 +26,10 @@ type Product struct {
 type ProductReview struct {
 	ID        uuid.UUID
 	ProductID uuid.UUID
+	UserID    *uuid.UUID
 	Rating    pgtype.Int4
 	Sentiment pgtype.Int4
-	Comment   pgtype.Text
+	Review    pgtype.Text
 	CreatedAt pgtype.Timestamptz
 }
 

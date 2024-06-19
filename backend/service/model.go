@@ -22,3 +22,20 @@ type User struct {
 	ID       uuid.UUID `json:"id"`
 	Username string    `json:"username"`
 }
+
+// Product defines the modelling to the product type
+type Product struct {
+	ID      *uuid.UUID      `json:"id"`
+	Title   string          `json:"title"`
+	Reviews []ProductReview `json:"reviews"`
+}
+
+// ProductReview defines the modelling to the product review type
+type ProductReview struct {
+	ID        uuid.UUID `json:"id"`
+	Review    string    `json:"review"`
+	Sentiment int       `json:"sentiment,omitempty"`
+	Rating    int       `json:"rating"`
+	ProductID uuid.UUID `json:"product_id"`
+	UserID    uuid.UUID `json:"user_id"`
+}

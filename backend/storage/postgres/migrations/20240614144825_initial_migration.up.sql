@@ -9,9 +9,10 @@ BEGIN;
     CREATE TABLE product_reviews (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         product_id UUID REFERENCES products(id) NOT NULL,
+        user_id UUID REFERENCES users(id),
         rating INT CHECK (rating >= 1 AND rating <= 5),
         sentiment INT CHECK (sentiment >= -1 AND sentiment <= 1),
-        comment TEXT,
+        review TEXT,
 
         created_at TIMESTAMPTZ DEFAULT now()
     );

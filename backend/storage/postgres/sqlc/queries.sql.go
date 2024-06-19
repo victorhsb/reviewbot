@@ -9,7 +9,63 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const getProduct = `-- name: GetProduct :one
+SELECT p.id, p.title, p.created_at, json_agg(r.*) FROM products p LEFT JOIN product_reviews r ON p.id = r.product_id WHERE p.id = $1 GROUP BY p.id
+`
+
+type GetProductRow struct {
+	ID        uuid.UUID
+	Title     string
+	CreatedAt pgtype.Timestamptz
+	JsonAgg   []byte
+}
+
+func (q *Queries) GetProduct(ctx context.Context, id uuid.UUID) (GetProductRow, error) {
+	row := q.db.QueryRow(ctx, getProduct, id)
+	var i GetProductRow
+	err := row.Scan(
+		&i.ID,
+		&i.Title,
+		&i.CreatedAt,
+		&i.JsonAgg,
+	)
+	return i, err
+}
+
+const getProductReviews = `-- name: GetProductReviews :many
+SELECT id, product_id, user_id, rating, sentiment, review, created_at FROM product_reviews WHERE product_id = $1
+`
+
+func (q *Queries) GetProductReviews(ctx context.Context, productID uuid.UUID) ([]ProductReview, error) {
+	rows, err := q.db.Query(ctx, getProductReviews, productID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ProductReview
+	for rows.Next() {
+		var i ProductReview
+		if err := rows.Scan(
+			&i.ID,
+			&i.ProductID,
+			&i.UserID,
+			&i.Rating,
+			&i.Sentiment,
+			&i.Review,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 const getUser = `-- name: GetUser :one
 SELECT id, username, created_at FROM users WHERE id = $1
@@ -52,6 +108,47 @@ func (q *Queries) ListMessagesByParticipant(ctx context.Context, dollar_1 uuid.U
 	return items, nil
 }
 
+const listProducts = `-- name: ListProducts :many
+SELECT p.id, p.title, p.created_at, json_agg(r.*) FROM products p LEFT JOIN product_reviews r ON p.id = r.product_id GROUP BY p.id LIMIT $2::bigint OFFSET $1::bigint
+`
+
+type ListProductsParams struct {
+	Offset int64
+	Limit  int64
+}
+
+type ListProductsRow struct {
+	ID        uuid.UUID
+	Title     string
+	CreatedAt pgtype.Timestamptz
+	JsonAgg   []byte
+}
+
+func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]ListProductsRow, error) {
+	rows, err := q.db.Query(ctx, listProducts, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListProductsRow
+	for rows.Next() {
+		var i ListProductsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Title,
+			&i.CreatedAt,
+			&i.JsonAgg,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const saveMessage = `-- name: SaveMessage :exec
 INSERT INTO messages (receiver_id, sender_id, message) VALUES ($1, $2, $3)
 `
@@ -67,6 +164,39 @@ func (q *Queries) SaveMessage(ctx context.Context, arg SaveMessageParams) error 
 	return err
 }
 
+const saveProductReview = `-- name: SaveProductReview :one
+INSERT INTO product_reviews (product_id, user_id, rating, sentiment, review) VALUES ($1, $2, $3, $4, $5) RETURNING id, product_id, user_id, rating, sentiment, review, created_at
+`
+
+type SaveProductReviewParams struct {
+	ProductID uuid.UUID
+	UserID    *uuid.UUID
+	Rating    pgtype.Int4
+	Sentiment pgtype.Int4
+	Review    pgtype.Text
+}
+
+func (q *Queries) SaveProductReview(ctx context.Context, arg SaveProductReviewParams) (ProductReview, error) {
+	row := q.db.QueryRow(ctx, saveProductReview,
+		arg.ProductID,
+		arg.UserID,
+		arg.Rating,
+		arg.Sentiment,
+		arg.Review,
+	)
+	var i ProductReview
+	err := row.Scan(
+		&i.ID,
+		&i.ProductID,
+		&i.UserID,
+		&i.Rating,
+		&i.Sentiment,
+		&i.Review,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const saveUser = `-- name: SaveUser :one
 INSERT INTO users (username) VALUES ($1) RETURNING id, username, created_at
 `
@@ -76,4 +206,34 @@ func (q *Queries) SaveUser(ctx context.Context, username string) (User, error) {
 	var i User
 	err := row.Scan(&i.ID, &i.Username, &i.CreatedAt)
 	return i, err
+}
+
+const updateProductSentiment = `-- name: UpdateProductSentiment :exec
+UPDATE product_reviews SET sentiment = $1 WHERE id = $2
+`
+
+type UpdateProductSentimentParams struct {
+	Sentiment pgtype.Int4
+	ID        uuid.UUID
+}
+
+func (q *Queries) UpdateProductSentiment(ctx context.Context, arg UpdateProductSentimentParams) error {
+	_, err := q.db.Exec(ctx, updateProductSentiment, arg.Sentiment, arg.ID)
+	return err
+}
+
+const upsertProduct = `-- name: UpsertProduct :one
+INSERT INTO products (id, title) values ($1, $2) ON CONFLICT (id) DO UPDATE SET title = $2 WHERE products.id = $1 returning id
+`
+
+type UpsertProductParams struct {
+	ID    uuid.UUID
+	Title string
+}
+
+func (q *Queries) UpsertProduct(ctx context.Context, arg UpsertProductParams) (uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, upsertProduct, arg.ID, arg.Title)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
 }

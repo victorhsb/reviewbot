@@ -24,10 +24,12 @@ func main() {
 		panic(err)
 	}
 
-	svc := service.New(repo)
+	messsageService := service.NewMessageService(repo)
+	productService := service.NewProductService(repo, service.ProductServiceConfig{DefaultListingLimit: 100})
 
 	router := routes.NewRouter()
-	routes.RegisterMessageRoutes(router, svc)
+	routes.RegisterMessageRoutes(router, messsageService)
+	routes.RegisterProductRoutes(router, productService)
 
 	if err := router.Run(cfg.Port); err != nil {
 		panic(err)

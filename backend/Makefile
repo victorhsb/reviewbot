@@ -16,5 +16,5 @@ deps:
 	@docker compose up -d db
 
 run: tools
-	@go run cmd/review-bot/*.go
+	@REVIEWBOT_DATABASE_URL="postgresql://user:password@localhost:5432/product-reviews?sslmode=disable" REVIEWBOT_PORT=":8080" air
 

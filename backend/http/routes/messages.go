@@ -11,7 +11,7 @@ import (
 	"github.com/victorhsb/review-bot/backend/service"
 )
 
-func RegisterMessageRoutes(engine *gin.Engine, svc service.Interface) {
+func RegisterMessageRoutes(engine *gin.Engine, svc service.Messager) {
 	v1 := engine.Group("/v1")
 	msgs := v1.Group("/messages")
 	{
@@ -20,7 +20,7 @@ func RegisterMessageRoutes(engine *gin.Engine, svc service.Interface) {
 	}
 }
 
-func NewGetMessagesHandler(svc service.MessageReader) gin.HandlerFunc {
+func NewGetMessagesHandler(svc service.Messager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
@@ -79,7 +79,7 @@ func (m NewMessagePayload) ToModel() (*service.Message, error) {
 	return &mod, nil
 }
 
-func NewSaveMessageHandler(svc service.MessageWriter) gin.HandlerFunc {
+func NewSaveMessageHandler(svc service.Messager) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
