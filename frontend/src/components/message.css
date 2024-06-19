@@ -1,0 +1,13 @@
+.message-card {
+  width: fit-content;
+  padding: 10px;
+  margin: 10px;
+}
+
+.align-left {
+  align-self: flex-start;
+}
+
+.align-right {
+  align-self: flex-end;
+}

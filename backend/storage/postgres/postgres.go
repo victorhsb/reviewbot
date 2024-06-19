@@ -15,13 +15,27 @@ type client struct {
 	conn *pgxpool.Pool
 }
 
+// New creates a new instance of the postgres client
+func New(ctx context.Context, connUrl string) (service.Storage, error) {
+	conn, err := pgxpool.New(ctx, connUrl)
+	if err != nil {
+		return nil, fmt.Errorf("could not establish connection to postgres; %w", err)
+	}
+
+	repo := &client{
+		conn: conn,
+	}
+
+	return repo, nil
+}
+
 // SaveMessage stores a message in the database
 func (c *client) SaveMessage(ctx context.Context, msg service.Message) error {
 	return sqlc.New(c.conn).SaveMessage(ctx, sqlc.SaveMessageParams{
 		// ID is expected to be automatically set by the database
-		ReceiverID: msg.Receiver,
+		ReceiverID: msg.Target,
 		SenderID:   msg.Sender,
-		Message:    msg.Content,
+		Message:    msg.Message,
 		// CreatedAt is expected to be automatically set by the database
 	})
 }
@@ -35,28 +49,15 @@ func (c *client) ListMessagesByParticipant(ctx context.Context, id uuid.UUID) ([
 		return nil, fmt.Errorf("could not list messages by participant; %w", err)
 	}
 
-	var result []service.Message
+	result := make([]service.Message, 0)
 	for _, m := range messages {
 		result = append(result, service.Message{
 			Sender:    m.SenderID,
-			Receiver:  m.ReceiverID,
-			Content:   m.Message,
+			Target:    m.ReceiverID,
+			Message:   m.Message,
 			Timestamp: m.CreatedAt.Time,
 		})
 	}
 
 	return result, nil
-}
-
-func New(ctx context.Context, connUrl string) (service.MessageStorage, error) {
-	conn, err := pgxpool.New(ctx, connUrl)
-	if err != nil {
-		return nil, fmt.Errorf("could not establish connection to postgres; %w", err)
-	}
-
-	repo := &client{
-		conn: conn,
-	}
-
-	return repo, nil
 }

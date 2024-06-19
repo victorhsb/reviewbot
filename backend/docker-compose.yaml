@@ -4,10 +4,6 @@ services:
     image: postgres:16.3
     ports:
       - "5432:5432"
-    networks:
-      - sponsorshipNetwork
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
@@ -19,6 +15,6 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - postgres
+      - db
     environment:
-      - DATABASE_CONNECTION_URL=postgresql://user:password@db:5432/product-reviews?sslmode=disable
+      - DATABASE_URL=postgresql://user:password@db:5432/product-reviews?sslmode=disable

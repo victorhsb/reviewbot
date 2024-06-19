@@ -6,6 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
+type Interface interface {
+	MessageWriter
+	MessageReader
+}
+
 // MessageWriter defines the interface definition for the message writer
 type MessageWriter interface {
 	// SaveMessage persists the message to the storage and emits any events to further process the message
@@ -16,6 +21,12 @@ type MessageWriter interface {
 type MessageReader interface {
 	// GetMessagesByParticipant returns a list of messages sent or received by a specific user
 	GetMessagesByParticipant(context.Context, uuid.UUID) ([]Message, error)
+}
+
+type Storage interface {
+	MessageStorage
+
+	Migrate() error
 }
 
 // MessageStorage defines the interface definition for the message persistence layer
