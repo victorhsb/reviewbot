@@ -6,6 +6,13 @@ BEGIN;
         created_at TIMESTAMPTZ DEFAULT now()
     );
 
+    CREATE TABLE users (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        username TEXT NOT NULL UNIQUE,
+
+        created_at TIMESTAMPTZ DEFAULT now()
+    );
+
     CREATE TABLE product_reviews (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         product_id UUID REFERENCES products(id) NOT NULL,
@@ -17,21 +24,13 @@ BEGIN;
         created_at TIMESTAMPTZ DEFAULT now()
     );
 
-    CREATE TABLE users (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        username TEXT NOT NULL UNIQUE,
-
-        created_at TIMESTAMPTZ DEFAULT now()
-    );
+    CREATE TYPE direction AS ENUM ('sent', 'received');
 
     CREATE TABLE messages (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        receiver_id UUID,
-        sender_id UUID,
+        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+        direction direction NOT NULL,
         message TEXT NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT now(),
-
-        CONSTRAINT fk_message_receiver FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
-        CONSTRAINT fk_message_sender FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+        created_at TIMESTAMPTZ DEFAULT now()
     );
 COMMIT;

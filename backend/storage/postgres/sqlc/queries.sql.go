@@ -13,14 +13,14 @@ import (
 )
 
 const getProduct = `-- name: GetProduct :one
-SELECT p.id, p.title, p.created_at, json_agg(r.*) FROM products p LEFT JOIN product_reviews r ON p.id = r.product_id WHERE p.id = $1 GROUP BY p.id
+SELECT p.id, p.title, p.created_at, jsonb_agg(r.*) FROM products p LEFT JOIN product_reviews r ON p.id = r.product_id WHERE p.id = $1 GROUP BY p.id
 `
 
 type GetProductRow struct {
 	ID        uuid.UUID
 	Title     string
 	CreatedAt pgtype.Timestamptz
-	JsonAgg   []byte
+	JsonbAgg  []byte
 }
 
 func (q *Queries) GetProduct(ctx context.Context, id uuid.UUID) (GetProductRow, error) {
@@ -30,7 +30,7 @@ func (q *Queries) GetProduct(ctx context.Context, id uuid.UUID) (GetProductRow, 
 		&i.ID,
 		&i.Title,
 		&i.CreatedAt,
-		&i.JsonAgg,
+		&i.JsonbAgg,
 	)
 	return i, err
 }
@@ -78,25 +78,31 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 	return i, err
 }
 
-const listMessagesByParticipant = `-- name: ListMessagesByParticipant :many
-SELECT id, receiver_id, sender_id, message, created_at FROM messages WHERE sender_id = $1::uuid OR receiver_id = $1::uuid ORDER BY created_at
+const listMessagesByUser = `-- name: ListMessagesByUser :many
+SELECT message, created_at, direction, created_at FROM messages WHERE user_id = $1::uuid ORDER BY created_at
 `
 
-func (q *Queries) ListMessagesByParticipant(ctx context.Context, dollar_1 uuid.UUID) ([]Message, error) {
-	rows, err := q.db.Query(ctx, listMessagesByParticipant, dollar_1)
+type ListMessagesByUserRow struct {
+	Message     string
+	CreatedAt   pgtype.Timestamptz
+	Direction   Direction
+	CreatedAt_2 pgtype.Timestamptz
+}
+
+func (q *Queries) ListMessagesByUser(ctx context.Context, dollar_1 uuid.UUID) ([]ListMessagesByUserRow, error) {
+	rows, err := q.db.Query(ctx, listMessagesByUser, dollar_1)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Message
+	var items []ListMessagesByUserRow
 	for rows.Next() {
-		var i Message
+		var i ListMessagesByUserRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.ReceiverID,
-			&i.SenderID,
 			&i.Message,
 			&i.CreatedAt,
+			&i.Direction,
+			&i.CreatedAt_2,
 		); err != nil {
 			return nil, err
 		}
@@ -109,7 +115,7 @@ func (q *Queries) ListMessagesByParticipant(ctx context.Context, dollar_1 uuid.U
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT p.id, p.title, p.created_at, json_agg(r.*) FROM products p LEFT JOIN product_reviews r ON p.id = r.product_id GROUP BY p.id LIMIT $2::bigint OFFSET $1::bigint
+SELECT p.id, p.title, p.created_at, jsonb_agg(jsonb_build_object('review', r.review, 'rating', r.rating, 'username', u.username )) FROM products p LEFT JOIN product_reviews r ON p.id = r.product_id join users u on r.user_id = u.id GROUP BY p.id LIMIT $2::bigint OFFSET $1::bigint
 `
 
 type ListProductsParams struct {
@@ -121,7 +127,7 @@ type ListProductsRow struct {
 	ID        uuid.UUID
 	Title     string
 	CreatedAt pgtype.Timestamptz
-	JsonAgg   []byte
+	JsonbAgg  []byte
 }
 
 func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]ListProductsRow, error) {
@@ -137,7 +143,7 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]L
 			&i.ID,
 			&i.Title,
 			&i.CreatedAt,
-			&i.JsonAgg,
+			&i.JsonbAgg,
 		); err != nil {
 			return nil, err
 		}
@@ -150,17 +156,17 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]L
 }
 
 const saveMessage = `-- name: SaveMessage :exec
-INSERT INTO messages (receiver_id, sender_id, message) VALUES ($1, $2, $3)
+INSERT INTO messages (direction, user_id, message) VALUES ($1, $2, $3)
 `
 
 type SaveMessageParams struct {
-	ReceiverID *uuid.UUID
-	SenderID   *uuid.UUID
-	Message    string
+	Direction Direction
+	UserID    *uuid.UUID
+	Message   string
 }
 
 func (q *Queries) SaveMessage(ctx context.Context, arg SaveMessageParams) error {
-	_, err := q.db.Exec(ctx, saveMessage, arg.ReceiverID, arg.SenderID, arg.Message)
+	_, err := q.db.Exec(ctx, saveMessage, arg.Direction, arg.UserID, arg.Message)
 	return err
 }
 

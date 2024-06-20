@@ -1,6 +1,7 @@
 BEGIN;
-    DROP TABLE messages;
-    DROP TABLE users;
-    DROP TABLE product_reviews;
-    DROP TABLE products;
+    DROP TABLE messages CASCADE;
+    DROP TABLE users CASCADE;
+    DROP TABLE product_reviews CASCADE;
+    DROP TABLE products CASCADE;
+    DROP TYPE direction;
 COMMIT;

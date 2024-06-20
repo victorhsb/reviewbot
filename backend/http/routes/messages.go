@@ -38,43 +38,34 @@ func NewGetMessagesHandler(svc service.Messager) gin.HandlerFunc {
 			return
 		}
 
-		messages, err := svc.GetMessagesByParticipant(ctx, parsedID)
+		messages, err := svc.ListMessagesByUserID(ctx, parsedID)
 		if err != nil {
 			log.Error().Err(err).Msg("could not get messages")
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not get messages"})
 			return
 		}
 
-		log.Info().Any("return", messages).Msg("GetMessagesHandler")
+		log.Debug().Any("return", messages).Msg("GetMessagesHandler")
 		c.JSON(http.StatusOK, messages)
 	}
 }
 
 type NewMessagePayload struct {
 	Message string `json:"message" binding:"required"`
-	Sender  string `json:"sender" binding:"uuid"`
-	Target  string `json:"target"`
+	UserID  string `json:"userId" binding:"required,uuid"`
 }
 
 func (m NewMessagePayload) ToModel() (*service.Message, error) {
 	mod := service.Message{
-		Message: m.Message,
+		Message:   m.Message,
+		Direction: service.DirectionSent,
 	}
 
-	if m.Sender != "" {
-		parsedSender, err := uuid.Parse(m.Sender)
-		if err != nil {
-			return nil, fmt.Errorf("could not parse sender id; %w", err)
-		}
-		mod.Sender = &parsedSender
+	parsedID, err := uuid.Parse(m.UserID)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse user id; %w", err)
 	}
-	if m.Target != "" {
-		parsedTarget, err := uuid.Parse(m.Target)
-		if err != nil {
-			return nil, fmt.Errorf("could not parse target id; %w", err)
-		}
-		mod.Target = &parsedTarget
-	}
+	mod.UserID = parsedID
 
 	return &mod, nil
 }
@@ -105,7 +96,7 @@ func NewSaveMessageHandler(svc service.Messager) gin.HandlerFunc {
 			return
 		}
 
-		log.Info().Msg("SaveMessageHandler")
+		log.Debug().Msg("SaveMessageHandler")
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	}
 }

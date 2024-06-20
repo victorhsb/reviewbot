@@ -10,8 +10,8 @@ import (
 type Messager interface {
 	// SaveMessage persists the message to the storage and emits any events to further process the message
 	SaveMessage(context.Context, Message) error
-	// GetMessagesByParticipant returns a list of messages sent or received by a specific user
-	GetMessagesByParticipant(context.Context, uuid.UUID) ([]Message, error)
+	// ListMessagesByUserID returns a list of messages sent or received by a specific user
+	ListMessagesByUserID(context.Context, uuid.UUID) ([]Message, error)
 }
 
 // ProductReviewer is an interface that defines the methods for the product service
@@ -46,5 +46,5 @@ type ProductStorage interface {
 type MessageStorage interface {
 	SaveMessage(context.Context, Message) error
 
-	ListMessagesByParticipant(context.Context, uuid.UUID) ([]Message, error)
+	ListMessagesByUserID(context.Context, uuid.UUID) ([]Message, error)
 }

@@ -15,9 +15,9 @@ func RegisterProductRoutes(engine *gin.Engine, svc service.ProductReviewer) {
 	v1 := engine.Group("/v1")
 	products := v1.Group("/products")
 	{
-		products.GET("/:id", NewGetProductHandler(svc)) // get product by id handler
-		products.POST("", NewSaveProductHandler(svc))   // save product handler
-		products.GET("", NewListProductHandler(svc))    // list product handler
+		products.GET("/:id", NewGetProductHandler(svc))
+		products.POST("", NewSaveProductHandler(svc))
+		products.GET("", NewListProductHandler(svc))
 	}
 }
 

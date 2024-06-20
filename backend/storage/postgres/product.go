@@ -33,7 +33,7 @@ func (c *client) GetProduct(ctx context.Context, id uuid.UUID) (service.Product,
 	}
 
 	reviews := make([]service.ProductReview, 0)
-	err = json.NewDecoder(bytes.NewReader(p.JsonAgg)).Decode(&reviews)
+	err = json.NewDecoder(bytes.NewReader(p.JsonbAgg)).Decode(&reviews)
 	if err != nil {
 		return service.Product{}, fmt.Errorf("could not decode product reviews; %w", err)
 	}
@@ -54,8 +54,8 @@ func (c *client) ListProduct(ctx context.Context, limit int64, offset int64) ([]
 	products := make([]*service.Product, len(ps))
 	for i, p := range ps {
 		reviews := make([]service.ProductReview, 0)
-		if string(p.JsonAgg) != "[null]" { // manually skip jsonb_agg null values for the sake of simplicity
-			err = json.NewDecoder(bytes.NewReader(p.JsonAgg)).Decode(&reviews)
+		if string(p.JsonbAgg) != "[null]" { // manually skip jsonb_agg null values for the sake of simplicity
+			err = json.NewDecoder(bytes.NewReader(p.JsonbAgg)).Decode(&reviews)
 			if err != nil {
 				return nil, fmt.Errorf("could not decode product reviews; %w", err)
 			}

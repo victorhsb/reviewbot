@@ -5,16 +5,61 @@
 package sqlc
 
 import (
+	"database/sql/driver"
+	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Direction string
+
+const (
+	DirectionSent     Direction = "sent"
+	DirectionReceived Direction = "received"
+)
+
+func (e *Direction) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = Direction(s)
+	case string:
+		*e = Direction(s)
+	default:
+		return fmt.Errorf("unsupported scan type for Direction: %T", src)
+	}
+	return nil
+}
+
+type NullDirection struct {
+	Direction Direction
+	Valid     bool // Valid is true if Direction is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullDirection) Scan(value interface{}) error {
+	if value == nil {
+		ns.Direction, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.Direction.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullDirection) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.Direction), nil
+}
+
 type Message struct {
-	ID         uuid.UUID
-	ReceiverID *uuid.UUID
-	SenderID   *uuid.UUID
-	Message    string
-	CreatedAt  pgtype.Timestamptz
+	ID        uuid.UUID
+	UserID    *uuid.UUID
+	Direction Direction
+	Message   string
+	CreatedAt pgtype.Timestamptz
 }
 
 type Product struct {

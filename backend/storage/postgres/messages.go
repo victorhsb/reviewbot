@@ -14,18 +14,22 @@ import (
 func (c *client) SaveMessage(ctx context.Context, msg service.Message) error {
 	return sqlc.New(c.conn).SaveMessage(ctx, sqlc.SaveMessageParams{
 		// ID is expected to be automatically set by the database
-		ReceiverID: msg.Target,
-		SenderID:   msg.Sender,
-		Message:    msg.Message,
+		UserID:  &msg.UserID,
+		Message: msg.Message,
 		// CreatedAt is expected to be automatically set by the database
 	})
 }
 
-// ListMessagesByParticipant retrieves all messages sent or received by a participant from the database
-func (c *client) ListMessagesByParticipant(ctx context.Context, id uuid.UUID) ([]service.Message, error) {
+var directionMap = map[sqlc.Direction]service.Direction{
+	sqlc.DirectionSent:     service.DirectionSent,
+	sqlc.DirectionReceived: service.DirectionReceived,
+}
+
+// ListMessagesByUserID retrieves all messages sent or received by a participant from the database
+func (c *client) ListMessagesByUserID(ctx context.Context, id uuid.UUID) ([]service.Message, error) {
 	queries := sqlc.New(c.conn)
 
-	messages, err := queries.ListMessagesByParticipant(ctx, id)
+	messages, err := queries.ListMessagesByUser(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("could not list messages by participant; %w", err)
 	}
@@ -33,9 +37,8 @@ func (c *client) ListMessagesByParticipant(ctx context.Context, id uuid.UUID) ([
 	result := make([]service.Message, 0)
 	for _, m := range messages {
 		result = append(result, service.Message{
-			Sender:    m.SenderID,
-			Target:    m.ReceiverID,
 			Message:   m.Message,
+			Direction: directionMap[m.Direction],
 			Timestamp: m.CreatedAt.Time,
 		})
 	}

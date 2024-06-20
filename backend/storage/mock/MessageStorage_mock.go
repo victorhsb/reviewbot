@@ -24,12 +24,12 @@ func (_m *MessageStorage) EXPECT() *MessageStorage_Expecter {
 	return &MessageStorage_Expecter{mock: &_m.Mock}
 }
 
-// ListMessagesByParticipant provides a mock function with given fields: _a0, _a1
-func (_m *MessageStorage) ListMessagesByParticipant(_a0 context.Context, _a1 uuid.UUID) ([]service.Message, error) {
+// ListMessagesByUserID provides a mock function with given fields: _a0, _a1
+func (_m *MessageStorage) ListMessagesByUserID(_a0 context.Context, _a1 uuid.UUID) ([]service.Message, error) {
 	ret := _m.Called(_a0, _a1)
 
 	if len(ret) == 0 {
-		panic("no return value specified for ListMessagesByParticipant")
+		panic("no return value specified for ListMessagesByUserID")
 	}
 
 	var r0 []service.Message
@@ -54,31 +54,31 @@ func (_m *MessageStorage) ListMessagesByParticipant(_a0 context.Context, _a1 uui
 	return r0, r1
 }
 
-// MessageStorage_ListMessagesByParticipant_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListMessagesByParticipant'
-type MessageStorage_ListMessagesByParticipant_Call struct {
+// MessageStorage_ListMessagesByUserID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListMessagesByUserID'
+type MessageStorage_ListMessagesByUserID_Call struct {
 	*mock.Call
 }
 
-// ListMessagesByParticipant is a helper method to define mock.On call
+// ListMessagesByUserID is a helper method to define mock.On call
 //   - _a0 context.Context
 //   - _a1 uuid.UUID
-func (_e *MessageStorage_Expecter) ListMessagesByParticipant(_a0 interface{}, _a1 interface{}) *MessageStorage_ListMessagesByParticipant_Call {
-	return &MessageStorage_ListMessagesByParticipant_Call{Call: _e.mock.On("ListMessagesByParticipant", _a0, _a1)}
+func (_e *MessageStorage_Expecter) ListMessagesByUserID(_a0 interface{}, _a1 interface{}) *MessageStorage_ListMessagesByUserID_Call {
+	return &MessageStorage_ListMessagesByUserID_Call{Call: _e.mock.On("ListMessagesByUserID", _a0, _a1)}
 }
 
-func (_c *MessageStorage_ListMessagesByParticipant_Call) Run(run func(_a0 context.Context, _a1 uuid.UUID)) *MessageStorage_ListMessagesByParticipant_Call {
+func (_c *MessageStorage_ListMessagesByUserID_Call) Run(run func(_a0 context.Context, _a1 uuid.UUID)) *MessageStorage_ListMessagesByUserID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(context.Context), args[1].(uuid.UUID))
 	})
 	return _c
 }
 
-func (_c *MessageStorage_ListMessagesByParticipant_Call) Return(_a0 []service.Message, _a1 error) *MessageStorage_ListMessagesByParticipant_Call {
+func (_c *MessageStorage_ListMessagesByUserID_Call) Return(_a0 []service.Message, _a1 error) *MessageStorage_ListMessagesByUserID_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MessageStorage_ListMessagesByParticipant_Call) RunAndReturn(run func(context.Context, uuid.UUID) ([]service.Message, error)) *MessageStorage_ListMessagesByParticipant_Call {
+func (_c *MessageStorage_ListMessagesByUserID_Call) RunAndReturn(run func(context.Context, uuid.UUID) ([]service.Message, error)) *MessageStorage_ListMessagesByUserID_Call {
 	_c.Call.Return(run)
 	return _c
 }
