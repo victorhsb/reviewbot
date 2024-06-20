@@ -1,22 +1,23 @@
-import Card from "@mui/material/Card";
-import { Box } from "@mui/system";
 import "./message.css"
-import { Message } from "../models"
+import moment from "moment"
+import { Message, User } from "../models"
 
 type MessageProps = {
   content: Message;
-  isReceiver?: boolean;
+  user?: User;
 }
 
-function MessageBubble({content, isReceiver}: MessageProps) {
-  const { senderName, sender, message } = content
+function MessageBubble({content, user}: MessageProps) {
+  const { message, direction, timestamp } = content
 
-  const auth = senderName && <b>{senderName}:</b>
-  const align = isReceiver ? 'align-left' : 'align-right'
+  const auth =  user && <b>{user.username}:</b>
+  const align = direction == 'sender' ? 'align-left' : 'align-right'
 
-  return <Box component={Card} className={`message-card ${align}`}>
-    {auth}<br />{message}
-  </Box>
+  const date = timestamp && <><br /><small className="message-timestamp">{moment(timestamp).format('MM/DD/YYYY HH:mm')}</small></>
+
+  return <div className={`message-card ${align}`}>
+    {auth}<br /><p>{message}{date}</p>
+  </div>
 }
 
 export default MessageBubble

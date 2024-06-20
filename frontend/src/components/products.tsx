@@ -9,7 +9,7 @@ type ProductProps = {
   product: Product
 };
 
-function Review({ review }: { review: { username: string, review: string } }) {
+function Review({ review }: { review: { username: string, review: string, timestamp: Date } }) {
   return <Card>
     <CardHeader title={review.username}/>
     <CardContent>

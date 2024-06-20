@@ -1,9 +1,12 @@
 export type Message = {
   message: string;
-  sender?: string;
-  senderName?: string;
-  receiver?: string;
-  receiverName?: string;
+  direction: string
+  timestamp: Date;
+}
+
+export type User = {
+  id: string;
+  username: string;
 }
 
 export type Product = {
@@ -12,5 +15,6 @@ export type Product = {
     username: string;
     rating: number;
     review: string;
+    timestamp: Date;
   }[];
 }
