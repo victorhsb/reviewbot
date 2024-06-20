@@ -24,6 +24,63 @@ func (_m *MessageStorage) EXPECT() *MessageStorage_Expecter {
 	return &MessageStorage_Expecter{mock: &_m.Mock}
 }
 
+// GetUserByID provides a mock function with given fields: _a0, _a1
+func (_m *MessageStorage) GetUserByID(_a0 context.Context, _a1 uuid.UUID) (service.User, error) {
+	ret := _m.Called(_a0, _a1)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserByID")
+	}
+
+	var r0 service.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) (service.User, error)); ok {
+		return rf(_a0, _a1)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID) service.User); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Get(0).(service.User)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, uuid.UUID) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MessageStorage_GetUserByID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserByID'
+type MessageStorage_GetUserByID_Call struct {
+	*mock.Call
+}
+
+// GetUserByID is a helper method to define mock.On call
+//   - _a0 context.Context
+//   - _a1 uuid.UUID
+func (_e *MessageStorage_Expecter) GetUserByID(_a0 interface{}, _a1 interface{}) *MessageStorage_GetUserByID_Call {
+	return &MessageStorage_GetUserByID_Call{Call: _e.mock.On("GetUserByID", _a0, _a1)}
+}
+
+func (_c *MessageStorage_GetUserByID_Call) Run(run func(_a0 context.Context, _a1 uuid.UUID)) *MessageStorage_GetUserByID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uuid.UUID))
+	})
+	return _c
+}
+
+func (_c *MessageStorage_GetUserByID_Call) Return(_a0 service.User, _a1 error) *MessageStorage_GetUserByID_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MessageStorage_GetUserByID_Call) RunAndReturn(run func(context.Context, uuid.UUID) (service.User, error)) *MessageStorage_GetUserByID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListMessagesByUserID provides a mock function with given fields: _a0, _a1
 func (_m *MessageStorage) ListMessagesByUserID(_a0 context.Context, _a1 uuid.UUID) ([]service.Message, error) {
 	ret := _m.Called(_a0, _a1)
@@ -79,6 +136,64 @@ func (_c *MessageStorage_ListMessagesByUserID_Call) Return(_a0 []service.Message
 }
 
 func (_c *MessageStorage_ListMessagesByUserID_Call) RunAndReturn(run func(context.Context, uuid.UUID) ([]service.Message, error)) *MessageStorage_ListMessagesByUserID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListUsers provides a mock function with given fields: _a0
+func (_m *MessageStorage) ListUsers(_a0 context.Context) ([]service.User, error) {
+	ret := _m.Called(_a0)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListUsers")
+	}
+
+	var r0 []service.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]service.User, error)); ok {
+		return rf(_a0)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []service.User); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]service.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MessageStorage_ListUsers_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListUsers'
+type MessageStorage_ListUsers_Call struct {
+	*mock.Call
+}
+
+// ListUsers is a helper method to define mock.On call
+//   - _a0 context.Context
+func (_e *MessageStorage_Expecter) ListUsers(_a0 interface{}) *MessageStorage_ListUsers_Call {
+	return &MessageStorage_ListUsers_Call{Call: _e.mock.On("ListUsers", _a0)}
+}
+
+func (_c *MessageStorage_ListUsers_Call) Run(run func(_a0 context.Context)) *MessageStorage_ListUsers_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *MessageStorage_ListUsers_Call) Return(_a0 []service.User, _a1 error) *MessageStorage_ListUsers_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MessageStorage_ListUsers_Call) RunAndReturn(run func(context.Context) ([]service.User, error)) *MessageStorage_ListUsers_Call {
 	_c.Call.Return(run)
 	return _c
 }

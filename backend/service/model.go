@@ -16,10 +16,10 @@ var (
 // Message is the model definition for what is considered a message
 // contains the sender, target, content, timestamp and a footprint that *can* be nil if this is the first message.
 type Message struct {
-	Message   string    `json:"message"`
-	UserID    uuid.UUID `json:"userID"`
-	Direction Direction `json:"direction"`
-	Timestamp time.Time `json:"timestamp,omitempty"`
+	Message   string     `json:"message"`
+	UserID    *uuid.UUID `json:"userID,omitempty"`
+	Direction Direction  `json:"direction"`
+	Timestamp time.Time  `json:"timestamp,omitempty"`
 }
 
 // User defines the modelling to the user type
@@ -44,4 +44,5 @@ type ProductReview struct {
 	ProductID *uuid.UUID `json:"product_id,omitempty"`
 	UserID    *uuid.UUID `json:"user_id,omitempty"`
 	Username  string     `json:"username,omitempty"`
+	CreatedAt time.Time  `json:"createdAt,omitempty"`
 }

@@ -68,7 +68,7 @@ func (q *Queries) GetProductReviews(ctx context.Context, productID uuid.UUID) ([
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, username, created_at FROM users WHERE id = $1
+SELECT id, username, created_at FROM users WHERE id = $1 limit 1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
@@ -115,7 +115,18 @@ func (q *Queries) ListMessagesByUser(ctx context.Context, dollar_1 uuid.UUID) ([
 }
 
 const listProducts = `-- name: ListProducts :many
-SELECT p.id, p.title, p.created_at, jsonb_agg(jsonb_build_object('review', r.review, 'rating', r.rating, 'username', u.username )) FROM products p LEFT JOIN product_reviews r ON p.id = r.product_id join users u on r.user_id = u.id GROUP BY p.id LIMIT $2::bigint OFFSET $1::bigint
+SELECT 
+    p.id, p.title, p.created_at,
+    jsonb_agg(u.*)
+FROM products p LEFT JOIN (
+    select r.product_id, r.review, r.sentiment, r.rating, u.username
+    from product_reviews r 
+    left join users u 
+        on r.user_id = u.id) u 
+        on p.id = u.product_id 
+GROUP BY p.id 
+LIMIT $2::bigint 
+OFFSET $1::bigint
 `
 
 type ListProductsParams struct {
@@ -145,6 +156,30 @@ func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) ([]L
 			&i.CreatedAt,
 			&i.JsonbAgg,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listUsers = `-- name: ListUsers :many
+select id, username, created_at from users
+`
+
+func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, listUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(&i.ID, &i.Username, &i.CreatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

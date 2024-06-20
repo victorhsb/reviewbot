@@ -14,8 +14,9 @@ import (
 func (c *client) SaveMessage(ctx context.Context, msg service.Message) error {
 	return sqlc.New(c.conn).SaveMessage(ctx, sqlc.SaveMessageParams{
 		// ID is expected to be automatically set by the database
-		UserID:  &msg.UserID,
-		Message: msg.Message,
+		UserID:    msg.UserID,
+		Message:   msg.Message,
+		Direction: sqlc.Direction(msg.Direction),
 		// CreatedAt is expected to be automatically set by the database
 	})
 }
@@ -44,4 +45,37 @@ func (c *client) ListMessagesByUserID(ctx context.Context, id uuid.UUID) ([]serv
 	}
 
 	return result, nil
+}
+
+func (c *client) GetUserByID(ctx context.Context, id uuid.UUID) (service.User, error) {
+	queries := sqlc.New(c.conn)
+
+	user, err := queries.GetUser(ctx, id)
+	if err != nil {
+		return service.User{}, fmt.Errorf("could not get user; %w", err)
+	}
+
+	return service.User{
+		ID:       user.ID,
+		Username: user.Username,
+	}, nil
+}
+
+func (c *client) ListUsers(ctx context.Context) ([]service.User, error) {
+	queries := sqlc.New(c.conn)
+
+	users, err := queries.ListUsers(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("could not list users; %w", err)
+	}
+
+	parsedUsers := make([]service.User, len(users))
+	for i, u := range users {
+		parsedUsers[i] = service.User{
+			ID:       u.ID,
+			Username: u.Username,
+		}
+	}
+
+	return parsedUsers, nil
 }

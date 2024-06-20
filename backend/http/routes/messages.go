@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,10 +12,58 @@ import (
 
 func RegisterMessageRoutes(engine *gin.Engine, svc service.Messager) {
 	v1 := engine.Group("/v1")
-	msgs := v1.Group("/messages")
+	users := v1.Group("/users")
 	{
-		msgs.GET("/:id", NewGetMessagesHandler(svc)) // get messages by participant handler
-		msgs.POST("", NewSaveMessageHandler(svc))    // save message handler
+		users.GET("", NewListUsersHandler(svc))                // list users
+		users.GET("/:id", NewGetUserHandler(svc))              // get user
+		users.POST("/:id/message", NewSaveMessageHandler(svc)) // save message handler
+		users.GET("/:id/messages", NewGetMessagesHandler(svc)) // get messages by user handler
+	}
+}
+
+func NewListUsersHandler(svc service.Messager) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		users, err := svc.ListUsers(ctx)
+		if err != nil {
+			log.Error().Err(err).Msg("could not get users")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not get users"})
+			return
+		}
+
+		log.Debug().Msg("ListUsersHandler")
+		c.JSON(http.StatusOK, users)
+	}
+}
+
+func NewGetUserHandler(svc service.Messager) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+
+		id := c.Param("id")
+		if id == "" {
+			log.Warn().Msg("missing id in request path")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "missing id in request path"})
+			return
+		}
+
+		parsedID, err := uuid.Parse(id)
+		if err != nil {
+			log.Warn().Err(err).Msg("missing id in request path")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "could not parse request id"})
+			return
+		}
+
+		user, err := svc.GetUserByID(ctx, parsedID)
+		if err != nil {
+			log.Error().Err(err).Msg("could not get user")
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not get user"})
+			return
+		}
+
+		log.Debug().Msg("GetUserHandler")
+		c.JSON(http.StatusOK, user)
 	}
 }
 
@@ -52,22 +99,13 @@ func NewGetMessagesHandler(svc service.Messager) gin.HandlerFunc {
 
 type NewMessagePayload struct {
 	Message string `json:"message" binding:"required"`
-	UserID  string `json:"userId" binding:"required,uuid"`
 }
 
-func (m NewMessagePayload) ToModel() (*service.Message, error) {
-	mod := service.Message{
+func (m NewMessagePayload) ToModel() *service.Message {
+	return &service.Message{
 		Message:   m.Message,
 		Direction: service.DirectionSent,
 	}
-
-	parsedID, err := uuid.Parse(m.UserID)
-	if err != nil {
-		return nil, fmt.Errorf("could not parse user id; %w", err)
-	}
-	mod.UserID = parsedID
-
-	return &mod, nil
 }
 
 func NewSaveMessageHandler(svc service.Messager) gin.HandlerFunc {
@@ -81,10 +119,15 @@ func NewSaveMessageHandler(svc service.Messager) gin.HandlerFunc {
 			return
 		}
 
-		model, err := message.ToModel()
+		parsedID, err := uuid.Parse(c.Param("id"))
 		if err != nil {
-			log.Warn().Err(err).Msg("could not parse message")
+			log.Warn().Err(err).Msg("could not parse user id to uuid")
+			c.JSON(http.StatusBadRequest, gin.H{"error": "could not parse user id"})
+			return
 		}
+
+		model := message.ToModel()
+		model.UserID = &parsedID
 
 		err = svc.SaveMessage(
 			ctx,

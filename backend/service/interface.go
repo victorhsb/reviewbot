@@ -12,6 +12,10 @@ type Messager interface {
 	SaveMessage(context.Context, Message) error
 	// ListMessagesByUserID returns a list of messages sent or received by a specific user
 	ListMessagesByUserID(context.Context, uuid.UUID) ([]Message, error)
+	// GetUserByID returns the user with the given ID
+	GetUserByID(context.Context, uuid.UUID) (User, error)
+	// ListUsers returns a list of all users
+	ListUsers(context.Context) ([]User, error)
 }
 
 // ProductReviewer is an interface that defines the methods for the product service
@@ -45,6 +49,7 @@ type ProductStorage interface {
 // MessageStorage defines the interface definition for the message persistence layer
 type MessageStorage interface {
 	SaveMessage(context.Context, Message) error
-
 	ListMessagesByUserID(context.Context, uuid.UUID) ([]Message, error)
+	GetUserByID(context.Context, uuid.UUID) (User, error)
+	ListUsers(context.Context) ([]User, error)
 }
