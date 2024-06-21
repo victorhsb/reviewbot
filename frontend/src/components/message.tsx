@@ -4,15 +4,15 @@ import { Message, User } from "../models"
 
 type MessageProps = {
   content: Message;
-  user: User;
+  user?: User;
 }
 
 function MessageBubble({content, user}: MessageProps) {
   const { message, direction, timestamp } = content
 
-  const sent = direction == 'sent'
+  const sent = direction == 'received'
 
-  const auth = <b>{sent ? user.username : "BOT"}:</b>
+  const auth = user && <b>{sent ? user.username : "BOT"}:</b>
   const align = !sent ? 'align-left' : 'align-right'
 
   const date = timestamp && <><br /><small>{moment(timestamp).format('MM/DD/YYYY HH:mm')}</small></>

@@ -1,4 +1,4 @@
-import { Button, Divider, Grid, Paper } from "@mui/material";
+import { Box, Button, Divider, Grid, Paper } from "@mui/material";
 import { Message, User } from "../models";
 import ChatMessage from "./message";
 import Stack from "@mui/material/Stack";
@@ -46,9 +46,9 @@ function Chat() {
         <Paper sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
           <h1 style={{ paddingLeft: "1em" }}>{selectedUser ? selectedUser.username : 'Select a user'}</h1>
           <Divider sx={{ marginBottom: 2 }} />
-          <Stack paddingX={2} spacing={1} sx={{ flex: 1 }}>
-            {messages.map((m, i) =>
-              <ChatMessage key={i} content={m} user={selectedUser} />
+          <Stack paddingX={2} spacing={1} sx={{ flex: 1, overflowY: 'auto', maxHeight: 'calc(90vh)' }}>
+            {messages.slice(-8).map((m, i) =>
+                <ChatMessage key={i} content={m} user={selectedUser} />
             )}
           </Stack>
           <InputMessage disabled={!selectedUser} onSend={(msg: string) => selectedUser && _api.sendMessage(selectedUser.id, msg)} />

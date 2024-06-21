@@ -10,6 +10,7 @@ export type User = {
 }
 
 export type Product = {
+  id: string;
   title: string;
   reviews: {
     username: string;
