@@ -25,9 +25,8 @@ type ProductReviewer interface {
 	GetProduct(context.Context, uuid.UUID) (Product, error)
 	ListProducts(context.Context, int64, int64) ([]*Product, error)
 
-	// SaveProductReview(context.Context, ProductReview) error
-	// GetProductReviews(context.Context, uuid.UUID) ([]ProductReview, error)
-	// UpdateProductReviewSentiment(context.Context, uuid.UUID, int64) error
+	SaveProductReview(context.Context, ProductReview) error
+	UpdateProductReview(context.Context, ProductReview) error
 }
 
 // Storage groups by all the storage interfaces along with utility methods
@@ -44,6 +43,9 @@ type ProductStorage interface {
 	UpsertProduct(context.Context, Product) (*uuid.UUID, error)
 	GetProduct(context.Context, uuid.UUID) (Product, error)
 	ListProduct(context.Context, int64, int64) ([]*Product, error)
+
+	SaveProductReview(context.Context, ProductReview) error
+	UpdateProductReview(context.Context, ProductReview) error
 }
 
 // MessageStorage defines the interface definition for the message persistence layer

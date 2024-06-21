@@ -20,6 +20,7 @@ type Message struct {
 	UserID    *uuid.UUID `json:"userID,omitempty"`
 	Direction Direction  `json:"direction"`
 	Timestamp time.Time  `json:"timestamp,omitempty"`
+	Metadata  []byte     `json:"-"`
 }
 
 // User defines the modelling to the user type

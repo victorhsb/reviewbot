@@ -49,3 +49,11 @@ func (p *ProductService) ListProducts(ctx context.Context, limit int64, page int
 
 	return p.storage.ListProduct(ctx, limit, offset)
 }
+
+func (p *ProductService) SaveProductReview(ctx context.Context, pr ProductReview) error {
+	return p.storage.SaveProductReview(ctx, pr)
+}
+
+func (p *ProductService) UpdateProductReview(ctx context.Context, pr ProductReview) error {
+	return p.storage.UpdateProductReview(ctx, pr)
+}

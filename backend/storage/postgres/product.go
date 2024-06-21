@@ -70,3 +70,11 @@ func (c *client) ListProduct(ctx context.Context, limit int64, offset int64) ([]
 
 	return products, nil
 }
+
+func (c *client) SaveProductReview(_ context.Context, _ service.ProductReview) error {
+	panic("not implemented") // TODO: Implement
+}
+
+func (c *client) UpdateProductReview(_ context.Context, _ service.ProductReview) error {
+	panic("not implemented") // TODO: Implement
+}
