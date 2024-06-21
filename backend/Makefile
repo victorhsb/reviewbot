@@ -16,5 +16,6 @@ deps:
 	@docker compose up -d db
 
 run: tools
+	@docker compose up -d db
 	@REVIEWBOT_DATABASE_URL="postgresql://user:password@localhost:5432/product-reviews?sslmode=disable" REVIEWBOT_PORT=":8080" air
 

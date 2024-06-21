@@ -71,10 +71,46 @@ func (c *client) ListProduct(ctx context.Context, limit int64, offset int64) ([]
 	return products, nil
 }
 
-func (c *client) SaveProductReview(_ context.Context, _ service.ProductReview) error {
-	panic("not implemented") // TODO: Implement
+func (c *client) SaveProductReview(ctx context.Context, pr service.ProductReview) (service.ProductReview, error) {
+	rev, err := sqlc.New(c.conn).SaveProductReview(ctx, sqlc.SaveProductReviewParams{
+		ProductID: *pr.ProductID,
+		UserID:    pr.UserID,
+		Rating:    int32(pr.Rating),
+		Sentiment: int32(pr.Sentiment),
+		Review:    pr.Review,
+	})
+
+	return service.ProductReview{
+		ID:        &rev.ID,
+		ProductID: &rev.ProductID,
+		UserID:    rev.UserID,
+		Review:    rev.Review.String,
+		Rating:    int(rev.Rating.Int32),
+		Sentiment: int(rev.Sentiment.Int32),
+	}, err
 }
 
-func (c *client) UpdateProductReview(_ context.Context, _ service.ProductReview) error {
-	panic("not implemented") // TODO: Implement
+func (c *client) UpdateProductReview(ctx context.Context, pr service.ProductReview) error {
+	return sqlc.New(c.conn).UpdateProductReview(ctx, sqlc.UpdateProductReviewParams{
+		ID:        *pr.ID,
+		Rating:    int32(pr.Rating),
+		Review:    pr.Review,
+		Sentiment: int32(pr.Sentiment),
+	})
+}
+
+func (c *client) GetProductReview(ctx context.Context, id uuid.UUID) (*service.ProductReview, error) {
+	rev, err := sqlc.New(c.conn).GetProductReview(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("could not get product review; %w", err)
+	}
+
+	return &service.ProductReview{
+		ID:        &rev.ID,
+		ProductID: &rev.ProductID,
+		UserID:    rev.UserID,
+		Review:    rev.Review.String,
+		Rating:    int(rev.Rating.Int32),
+		Sentiment: int(rev.Sentiment.Int32),
+	}, nil
 }

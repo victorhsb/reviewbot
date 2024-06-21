@@ -60,6 +60,14 @@ func (c *Cache[T]) Get(key string) (*T, bool) {
 	return &item.Value, true
 }
 
+// Delete removes an item from the cache by its key.
+func (c *Cache[T]) Delete(key string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	delete(c.items, key)
+}
+
 // startCleanupTimer starts a background goroutine that periodically checks the cache for expired items and removes them.
 // The cleanup interval is the same as the cache's TTL.
 // The goroutine stops when the context is cancelled.

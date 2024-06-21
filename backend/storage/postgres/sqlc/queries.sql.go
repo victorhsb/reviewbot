@@ -35,6 +35,25 @@ func (q *Queries) GetProduct(ctx context.Context, id uuid.UUID) (GetProductRow, 
 	return i, err
 }
 
+const getProductReview = `-- name: GetProductReview :one
+select id, product_id, user_id, rating, sentiment, review, created_at from product_reviews where id = $1 limit 1
+`
+
+func (q *Queries) GetProductReview(ctx context.Context, id uuid.UUID) (ProductReview, error) {
+	row := q.db.QueryRow(ctx, getProductReview, id)
+	var i ProductReview
+	err := row.Scan(
+		&i.ID,
+		&i.ProductID,
+		&i.UserID,
+		&i.Rating,
+		&i.Sentiment,
+		&i.Review,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getProductReviews = `-- name: GetProductReviews :many
 SELECT id, product_id, user_id, rating, sentiment, review, created_at FROM product_reviews WHERE product_id = $1
 `
@@ -206,15 +225,15 @@ func (q *Queries) SaveMessage(ctx context.Context, arg SaveMessageParams) error 
 }
 
 const saveProductReview = `-- name: SaveProductReview :one
-INSERT INTO product_reviews (product_id, user_id, rating, sentiment, review) VALUES ($1, $2, $3, $4, $5) RETURNING id, product_id, user_id, rating, sentiment, review, created_at
+INSERT INTO product_reviews (product_id, user_id, rating, sentiment, review) VALUES ($1, $2, $3::integer, $4::integer, $5::text) RETURNING id, product_id, user_id, rating, sentiment, review, created_at
 `
 
 type SaveProductReviewParams struct {
 	ProductID uuid.UUID
 	UserID    *uuid.UUID
-	Rating    pgtype.Int4
-	Sentiment pgtype.Int4
-	Review    pgtype.Text
+	Rating    int32
+	Sentiment int32
+	Review    string
 }
 
 func (q *Queries) SaveProductReview(ctx context.Context, arg SaveProductReviewParams) (ProductReview, error) {
@@ -249,17 +268,24 @@ func (q *Queries) SaveUser(ctx context.Context, username string) (User, error) {
 	return i, err
 }
 
-const updateProductSentiment = `-- name: UpdateProductSentiment :exec
-UPDATE product_reviews SET sentiment = $1 WHERE id = $2
+const updateProductReview = `-- name: UpdateProductReview :exec
+UPDATE product_reviews SET rating = $1::integer, sentiment = $2::integer, review = $3::text WHERE id = $4::uuid
 `
 
-type UpdateProductSentimentParams struct {
-	Sentiment pgtype.Int4
+type UpdateProductReviewParams struct {
+	Rating    int32
+	Sentiment int32
+	Review    string
 	ID        uuid.UUID
 }
 
-func (q *Queries) UpdateProductSentiment(ctx context.Context, arg UpdateProductSentimentParams) error {
-	_, err := q.db.Exec(ctx, updateProductSentiment, arg.Sentiment, arg.ID)
+func (q *Queries) UpdateProductReview(ctx context.Context, arg UpdateProductReviewParams) error {
+	_, err := q.db.Exec(ctx, updateProductReview,
+		arg.Rating,
+		arg.Sentiment,
+		arg.Review,
+		arg.ID,
+	)
 	return err
 }
 

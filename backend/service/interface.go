@@ -25,8 +25,9 @@ type ProductReviewer interface {
 	GetProduct(context.Context, uuid.UUID) (Product, error)
 	ListProducts(context.Context, int64, int64) ([]*Product, error)
 
-	SaveProductReview(context.Context, ProductReview) error
+	SaveProductReview(context.Context, ProductReview) (ProductReview, error)
 	UpdateProductReview(context.Context, ProductReview) error
+	GetProductReview(context.Context, uuid.UUID) (*ProductReview, error)
 }
 
 // Storage groups by all the storage interfaces along with utility methods
@@ -44,8 +45,9 @@ type ProductStorage interface {
 	GetProduct(context.Context, uuid.UUID) (Product, error)
 	ListProduct(context.Context, int64, int64) ([]*Product, error)
 
-	SaveProductReview(context.Context, ProductReview) error
+	SaveProductReview(context.Context, ProductReview) (ProductReview, error)
 	UpdateProductReview(context.Context, ProductReview) error
+	GetProductReview(context.Context, uuid.UUID) (*ProductReview, error)
 }
 
 // MessageStorage defines the interface definition for the message persistence layer
@@ -54,4 +56,9 @@ type MessageStorage interface {
 	ListMessagesByUserID(context.Context, uuid.UUID) ([]Message, error)
 	GetUserByID(context.Context, uuid.UUID) (User, error)
 	ListUsers(context.Context) ([]User, error)
+}
+
+// MessageProcessor is an interface that defines the methods for the message processor
+type MessageProcessor interface {
+	ProcessMessage(context.Context, Message) error
 }

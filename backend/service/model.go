@@ -16,11 +16,12 @@ var (
 // Message is the model definition for what is considered a message
 // contains the sender, target, content, timestamp and a footprint that *can* be nil if this is the first message.
 type Message struct {
-	Message   string     `json:"message"`
-	UserID    *uuid.UUID `json:"userID,omitempty"`
-	Direction Direction  `json:"direction"`
-	Timestamp time.Time  `json:"timestamp,omitempty"`
-	Metadata  []byte     `json:"-"`
+	Message string     `json:"message"`
+	UserID  *uuid.UUID `json:"userID,omitempty"`
+	// Direction is the direction of the message, if it was sent or received
+	Direction Direction `json:"direction"`
+	Timestamp time.Time `json:"timestamp,omitempty"`
+	Metadata  []byte    `json:"-"`
 }
 
 // User defines the modelling to the user type

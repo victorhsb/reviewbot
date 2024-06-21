@@ -2,16 +2,19 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 )
 
 type MessageService struct {
 	storage MessageStorage
+
+	processor MessageProcessor
 }
 
-func NewMessageService(storage MessageStorage) *MessageService {
-	return &MessageService{storage: storage}
+func NewMessageService(storage MessageStorage, processor MessageProcessor) *MessageService {
+	return &MessageService{storage: storage, processor: processor}
 }
 
 // Make sure MessageService implements the Messager interfaces
@@ -29,7 +32,19 @@ func (m *MessageService) ListMessagesByUserID(ctx context.Context, id uuid.UUID)
 
 // SaveMessage persists the message to the storage and emits any events to further process the message
 func (m *MessageService) SaveMessage(ctx context.Context, msg Message) error {
-	return m.storage.SaveMessage(ctx, msg)
+	if msg.Direction == "" {
+		msg.Direction = DirectionSent
+	}
+
+	err := m.storage.SaveMessage(ctx, msg)
+	if err != nil {
+		return fmt.Errorf("could not save message; %w", err)
+	}
+
+	if m.processor != nil {
+		return m.processor.ProcessMessage(ctx, msg)
+	}
+	return nil
 }
 
 // ListUsers returns a list of all users

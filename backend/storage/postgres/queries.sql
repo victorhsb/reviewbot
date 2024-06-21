@@ -33,11 +33,14 @@ GROUP BY p.id
 LIMIT sqlc.arg('limit')::bigint 
 OFFSET sqlc.arg('offset')::bigint;
 
+-- name: GetProductReview :one
+select * from product_reviews where id = $1 limit 1;
+
 -- name: GetProductReviews :many
 SELECT * FROM product_reviews WHERE product_id = $1;
 
 -- name: SaveProductReview :one
-INSERT INTO product_reviews (product_id, user_id, rating, sentiment, review) VALUES ($1, $2, $3, $4, $5) RETURNING *;
+INSERT INTO product_reviews (product_id, user_id, rating, sentiment, review) VALUES ($1, $2, @rating::integer, @sentiment::integer, @review::text) RETURNING *;
 
--- name: UpdateProductSentiment :exec
-UPDATE product_reviews SET sentiment = $1 WHERE id = $2;
+-- name: UpdateProductReview :exec
+UPDATE product_reviews SET rating = @rating::integer, sentiment = @sentiment::integer, review = @review::text WHERE id = @id::uuid;

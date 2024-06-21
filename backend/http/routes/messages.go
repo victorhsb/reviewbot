@@ -104,7 +104,7 @@ type NewMessagePayload struct {
 func (m NewMessagePayload) ToModel() *service.Message {
 	return &service.Message{
 		Message:   m.Message,
-		Direction: service.DirectionSent,
+		Direction: service.DirectionReceived,
 	}
 }
 
@@ -128,6 +128,7 @@ func NewSaveMessageHandler(svc service.Messager) gin.HandlerFunc {
 
 		model := message.ToModel()
 		model.UserID = &parsedID
+		log.Debug().Any("model", model).Msg("saving message")
 
 		err = svc.SaveMessage(
 			ctx,
